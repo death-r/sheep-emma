@@ -1,0 +1,15 @@
+{
+  "name": "emma-sheep",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@mercuryworkshop/bare-mux": "latest",
+    "@mercuryworkshop/epoxy-transport": "^2.1.28",
+    "@titaniumnetwork-dev/ultraviolet": "latest",
+    "express": "^4.19.2",
+    "wisp-server-node": "latest"
+  }
+}

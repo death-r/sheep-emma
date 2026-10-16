@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emma Sheep</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%91%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg:#fff7fb; --ink:#3a2347; --soft:#7a5c8a; --card:#ffffffcc; --line:#ecd9f5;
+    --g1:#ff9ec7; --g2:#b79bff; --g3:#8fd3ff;
+    --grad:linear-gradient(135deg,var(--g1),var(--g2) 55%,var(--g3));
+    --shadow:0 8px 24px rgba(150,100,200,.25);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18101f; --ink:#f6e9ff; --soft:#c5a9d8; --card:#2a1c36cc; --line:#43305a;
+      --g1:#e0679d; --g2:#8a63e6; --g3:#4aa8e0; --shadow:0 8px 24px rgba(0,0,0,.5);
+    }
+  }
+  * { box-sizing:border-box; }
+  html, body { height:100%; margin:0; font-family:"Segoe UI",system-ui,-apple-system,sans-serif; font-weight:600; color:var(--ink); background:var(--bg); }
+  #app { display:flex; flex-direction:column; height:100%; }
+
+  #top { background:var(--grad); padding:8px 10px 0; box-shadow:var(--shadow); position:relative; z-index:2; }
+  #tabs { display:flex; align-items:flex-end; gap:4px; overflow-x:auto; }
+  .tab { display:flex; align-items:center; gap:8px; max-width:190px; padding:8px 12px; border-radius:12px 12px 0 0; background:#ffffff55; color:#fff; cursor:pointer; font-size:13px; font-weight:800; white-space:nowrap; transition:background .15s; text-shadow:0 1px 2px rgba(60,20,90,.35); }
+  .tab:hover { background:#ffffff88; }
+  .tab.active { background:var(--bg); color:var(--ink); text-shadow:none; }
+  .tab span { overflow:hidden; text-overflow:ellipsis; }
+  .tab button { border:0; background:none; color:inherit; cursor:pointer; font-size:16px; font-weight:800; padding:0 2px; opacity:.7; }
+  .tab button:hover { opacity:1; }
+  #newtab { border:0; background:#ffffff44; color:#fff; width:30px; height:30px; margin:0 0 4px 4px; border-radius:50%; font-size:20px; font-weight:800; cursor:pointer; }
+  #newtab:hover { background:#ffffff88; }
+
+  #toolbar { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--bg); border-bottom:1px solid var(--line); }
+  .nav { width:34px; height:34px; border:0; border-radius:50%; background:var(--card); color:var(--ink); font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(150,100,200,.2); transition:transform .1s; }
+  .nav:hover { transform:translateY(-1px); background:var(--grad); color:#fff; }
+  #address { flex:1; border:2px solid var(--line); border-radius:22px; padding:9px 18px; background:var(--card); color:var(--ink); font:inherit; font-size:14px; font-weight:700; }
+  #address:focus { outline:none; border-color:var(--g2); box-shadow:0 0 0 4px rgba(183,155,255,.25); }
+
+  #viewport { position:relative; flex:1; }
+  #viewport iframe { position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff; }
+  #home { position:absolute; inset:0; overflow:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:24px; text-align:center;
+          background:radial-gradient(circle at 20% 20%, rgba(255,158,199,.35), transparent 45%), radial-gradient(circle at 80% 80%, rgba(143,211,255,.35), transparent 45%), var(--bg); }
+  #home h1 { margin:0; font-size:clamp(40px,9vw,76px); font-weight:900; letter-spacing:-1px; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #home .tag { margin:0; font-size:17px; font-weight:800; color:var(--soft); }
+  #homesearch { width:min(560px,92%); border:0; border-radius:30px; padding:16px 26px; font:inherit; font-size:17px; font-weight:700; color:var(--ink); background:var(--card); box-shadow:var(--shadow); }
+  #homesearch:focus { outline:none; box-shadow:var(--shadow), 0 0 0 4px rgba(183,155,255,.35); }
+  #links { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:6px; }
+  #links button { border:0; border-radius:16px; padding:12px 20px; font:inherit; font-size:14px; font-weight:800; color:#fff; background:var(--grad); cursor:pointer; box-shadow:var(--shadow); transition:transform .12s; }
+  #links button:hover { transform:translateY(-3px) scale(1.03); }
+  #status { margin-top:10px; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:800; background:var(--card); color:var(--soft); }
+  #status.ok { color:#2a9d6a; }
+  #status.bad { color:#fff; background:#d6456b; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div id="tabs"><button id="newtab" title="New tab">+</button></div>
+  </div>
+  <div id="toolbar">
+    <button class="nav" id="back" title="Back">&larr;</button>
+    <button class="nav" id="forward" title="Forward">&rarr;</button>
+    <button class="nav" id="reload" title="Reload">&#8635;</button>
+    <input id="address" placeholder="Search or enter a web address" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="viewport">
+    <div id="home">
+      <h1>&#128017; Emma Sheep</h1>
+      <p class="tag">Browse the fluffy way</p>
+      <input id="homesearch" placeholder="Search the web or type a link" autocomplete="off" spellcheck="false">
+      <div id="links">
+        <button data-url="https://duckduckgo.com">DuckDuckGo</button>
+        <button data-url="https://en.wikipedia.org">Wikipedia</button>
+        <button data-url="https://www.youtube.com">YouTube</button>
+        <button data-url="https://www.reddit.com">Reddit</button>
+      </div>
+      <div id="status">Starting up...</div>
+    </div>
+  </div>
+</div>
+
+<script src="/uv/uv.bundle.js"></script>
+<script src="/uv/uv.config.js"></script>
+<script type="module">
+import { BareMuxConnection } from "/baremux/index.mjs";
+
+const SEARCH = "https://duckduckgo.com/?q=";
+const $ = (id) => document.getElementById(id);
+const tabs = [];
+let active = null;
+let ready = false;
+let pending = null;
+
+function setStatus(text, kind) {
+  const el = $("status");
+  el.textContent = text;
+  el.className = kind || "";
+}
+
+async function registerWorker() {
+  if (!("serviceWorker" in navigator)) {
+    throw new Error("Service workers are unavailable. Use http://localhost:8080 or an https:// address.");
+  }
+  const reg = await navigator.serviceWorker.register("/sw.js", { scope: __uv$config.prefix });
+  if (reg.active) return;
+  const worker = reg.installing || reg.waiting;
+  if (!worker) return;
+  await new Promise((resolve, reject) => {
+    worker.addEventListener("statechange", () => {
+      if (worker.state === "activated") resolve();
+      if (worker.state === "redundant") reject(new Error("The service worker failed to install."));
+    });
+  });
+}
+
+async function init() {
+  try {
+    await registerWorker();
+    const wisp = (location.protocol === "https:" ? "wss" : "ws") + "://" + location.host + "/wisp/";
+    const connection = new BareMuxConnection("/baremux/worker.js");
+    await connection.setTransport("/epoxy/index.mjs", [{ wisp }]);
+    ready = true;
+    setStatus("Ready to browse", "ok");
+    if (pending) { const p = pending; pending = null; go(p); }
+  } catch (err) {
+    console.error(err);
+    setStatus("Setup failed: " + err.message, "bad");
+  }
+}
+
+function toUrl(input) {
+  const text = input.trim();
+  if (!text) return null;
+  try { const u = new URL(text); if (u.protocol === "http:" || u.protocol === "https:") return u.toString(); } catch {}
+  if (/^[^\s]+\.[^\s]{2,}$/.test(text)) return "https://" + text;
+  return SEARCH + encodeURIComponent(text);
+}
+
+function newTab(url) {
+  const tab = { title: "New tab", frame: document.createElement("iframe") };
+  tab.el = document.createElement("div");
+  tab.el.className = "tab";
+  tab.el.innerHTML = "<span>New tab</span><button title='Close'>&times;</button>";
+  tab.el.onclick = () => select(tab);
+  tab.el.querySelector("button").onclick = (e) => { e.stopPropagation(); closeTab(tab); };
+  tab.frame.style.display = "none";
+  tab.frame.addEventListener("load", () => {
+    try {
+      const doc = tab.frame.contentDocument;
+      tab.title = (doc && doc.title) || "Page";
+      tab.el.querySelector("span").textContent = tab.title;
+    } catch {}
+  });
+  $("tabs").insertBefore(tab.el, $("newtab"));
+  $("viewport").appendChild(tab.frame);
+  tabs.push(tab);
+  select(tab);
+  if (url) go(url);
+}
+
+function select(tab) {
+  active = tab;
+  const loaded = !!tab.shown;
+  tabs.forEach((t) => {
+    t.el.classList.toggle("active", t === tab);
+    t.frame.style.display = t === tab && t.shown ? "block" : "none";
+  });
+  $("home").style.display = loaded ? "none" : "flex";
+  $("address").value = tab.shown || "";
+}
+
+function closeTab(tab) {
+  tab.el.remove();
+  tab.frame.remove();
+  tabs.splice(tabs.indexOf(tab), 1);
+  if (!tabs.length) newTab();
+  else if (active === tab) select(tabs[tabs.length - 1]);
+}
+
+function go(input) {
+  const url = toUrl(input);
+  if (!url || !active) return;
+  if (!ready) {
+    pending = input;
+    setStatus("Still starting up. Your page will open as soon as it is ready.");
+    return;
+  }
+  active.shown = url;
+  active.frame.src = __uv$config.prefix + __uv$config.encodeUrl(url);
+  select(active);
+}
+
+$("address").addEventListener("keydown", (e) => { if (e.key === "Enter") go($("address").value); });
+$("homesearch").addEventListener("keydown", (e) => { if (e.key === "Enter") go($("homesearch").value); });
+document.querySelectorAll("#links button").forEach((b) => { b.onclick = () => go(b.dataset.url); });
+$("newtab").onclick = () => newTab();
+$("back").onclick = () => { try { active.frame.contentWindow.history.back(); } catch {} };
+$("forward").onclick = () => { try { active.frame.contentWindow.history.forward(); } catch {} };
+$("reload").onclick = () => { try { active.frame.contentWindow.location.reload(); } catch {} };
+
+newTab();
+init();
+</script>
+</body>
+</html>
